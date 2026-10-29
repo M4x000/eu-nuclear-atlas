@@ -1,0 +1,11 @@
+node_modules/
+__pycache__/
+*.zip
+PROFILE.md
+AGENTS.md
+BRIEF.md
+PROGRESS.md
+backups/
+.research/
+.qa/
+.env*

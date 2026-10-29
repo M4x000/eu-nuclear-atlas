@@ -1,0 +1,6 @@
+Natural Earth 5.1.2, 1:50m Admin 0 countries. Public domain.
+https://www.naturalearthdata.com/about/terms-of-use/
+Source: https://raw.githubusercontent.com/nvkelso/natural-earth-vector/v5.1.2/geojson/ne_50m_admin_0_countries.geojson
+Retrieved: 2026-10-08
+Source SHA256: 3e458fc036ad0a66411f2c1e6cac49c5d7bfb81cb1123bc513b22511a2b7fdeb
+Adaptation: European vicinity; coordinates rounded to 0.001 degrees; property selection. Indicative basemap, not a boundary authority.

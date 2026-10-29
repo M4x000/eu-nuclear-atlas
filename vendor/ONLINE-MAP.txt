@@ -1,0 +1,6 @@
+MapLibre GL JS 5.6.1, MapLibre GL Leaflet 0.1.1. Pinned local dependencies.
+Online map: https://tiles.openfreemap.org/styles/liberty
+Integration: https://openfreemap.org/quick_start/
+Terms: https://openfreemap.org/tos/
+Required map attribution: OpenFreeMap, OpenMapTiles, OpenStreetMap contributors.
+Reviewed 2026-10-08. No credentials, no paid account. Map tiles, fonts and styles are requested online; they are not packaged or prefetched for offline use.

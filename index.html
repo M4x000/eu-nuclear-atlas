@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Atlante verificabile delle realtà e delle competenze del nucleare europeo. Fusione, fissione, infrastrutture scientifiche e sanità.">
+    <title>EU Nuclear Atlas — Ingegneria e competenze</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%230c3339'/%3E%3Cellipse cx='20' cy='20' rx='15' ry='6' fill='none' stroke='%236ce1c2' stroke-width='2' transform='rotate(-40 20 20)'/%3E%3Ccircle cx='20' cy='20' r='4' fill='white'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="vendor/leaflet.css">
+    <link rel="stylesheet" href="vendor/MarkerCluster.css">
+    <link rel="stylesheet" href="vendor/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="vendor/maplibre-gl.css">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="workspace.css">
+  </head>
+  <body>
+    <a class="skip" href="#main">Vai al contenuto</a>
+    <header class="topbar">
+      <a class="brand" href="#atlas"><span class="brand-icon" aria-hidden="true">◉</span><span>EU NUCLEAR <b>ATLAS</b></span></a>
+      <nav aria-label="Navigazione principale">
+        <a href="#atlas" class="active">Atlante</a>
+        <a href="#rankings">Analisi dati</a>
+        <a href="#database">Database</a>
+        <a href="#methodology">Metodologia</a>
+      </nav>
+      <button id="shortlist-nav" class="button small">Shortlist <span id="saved-count">0</span></button>
+    </header>
+    <main id="main">
+<aside class="notice" aria-label="Campione pubblico"><strong>Demo con dati reali: 270 realtà · 20 annunci storici.</strong> Campione selettivo per uso didattico e divulgativo non commerciale. Non rappresenta il mercato europeo né offerte attualmente aperte. <a href="SOURCES.md" target="_blank" rel="noopener">Fonti e condizioni di riuso</a> · <a href="#methodology">Metodo e limiti</a></aside>
+      <div id="network-note" class="notice" role="status" hidden>
+        Sei offline. Ranking, schede e shortlist restano disponibili; è disponibile la mappa essenziale.
+        Città, strade e link esterni richiedono internet.
+      </div>
+
+      <!-- 01 / ATLAS — filters, map and employer list -->
+      <section id="atlas" class="panel active" aria-labelledby="atlas-title">
+        <div class="section-top">
+          <div>
+            <p class="eyebrow">01 / ESPLORA L’ECOSISTEMA</p>
+            <h2 id="atlas-title">Dove prende forma il nucleare</h2>
+          </div>
+        </div>
+        <div class="sector-tabs" role="group" aria-label="Filtra settore">
+          <button class="sector active" data-sector="all">Tutti i settori</button>
+          <button class="sector" data-sector="fusion"><span class="dot fusion">●</span> Fusione</button>
+          <button class="sector" data-sector="fission"><span class="dot fission">■</span> Fissione</button>
+          <button class="sector" data-sector="accelerators"><span class="dot accelerators">◆</span> Infrastrutture</button>
+          <button class="sector" data-sector="healthcare"><span class="dot healthcare">✚</span> Healthcare</button>
+        </div>
+        <div class="filterbar">
+          <label class="search">Cerca una realtà<input id="search" type="search" placeholder="Nome, progetto, competenza…"></label>
+          <label>
+            Paese
+            <select id="country">
+              <option value="all">Tutti i paesi</option>
+            </select>
+          </label>
+          <label>
+            Tipo
+            <select id="type">
+              <option value="all">Tutte le realtà</option>
+            </select>
+          </label>
+          <label>
+            Intensità del coinvolgimento
+            <select id="intensity">
+              <option value="all">Tutti i livelli</option>
+              <option value="3">3 · Nucleo del settore</option>
+              <option value="2">2 · Specialista</option>
+              <option value="1">1 · Abilitante</option>
+            </select>
+          </label>
+          <button id="reset" class="text-button">Azzera</button>
+        </div>
+        <div class="atlas-layout">
+          <div class="map-column">
+            <div id="map" aria-label="Mappa delle realtà europee">
+              <p id="map-fallback">Caricamento della mappa. L’elenco delle realtà resta sempre consultabile.</p>
+            </div>
+            <div class="map-connection">
+              <span id="map-status" role="status">Caricamento mappa…</span>
+              <button id="map-retry" class="text-button" hidden>Riprova mappa dettagliata</button>
+            </div>
+            <div class="map-footer">
+              <span>● Fusione <span class="fission">■</span> Fissione <span class="accelerators">◆</span> Infrastrutture <span class="healthcare">✚</span> Healthcare</span>
+              <button class="text-button" id="legend-toggle" aria-expanded="false">Come leggere la mappa ⓘ</button>
+            </div>
+            <div id="legend-detail" class="notice" hidden>
+              Forma e colore indicano il settore principale. Dimensione e intensità crescono da 1
+              (abilitante), a 2 (specialista), a 3 (nucleo del settore). Le schede mostrano tutti i settori e
+              la motivazione; i livelli sono giudizi editoriali, non misure economiche. I numeri sui gruppi
+              indicano quante realtà contengono.
+            </div>
+          </div>
+          <aside class="results">
+            <div class="results-heading">
+              <h3><span id="result-count">0</span> realtà</h3>
+              <label class="check"><input id="saved-only" type="checkbox"> Solo salvate</label>
+            </div>
+            <div id="entity-list" class="entity-list"></div>
+          </aside>
+        </div>
+        <div class="atlas-bottom">
+          <label class="check"><input id="outside" type="checkbox"> Includi Regno Unito e Norvegia (fuori perimetro)</label>
+          <div>
+            <button id="export" class="button small">Esporta shortlist ↓</button>
+            <button id="print" class="text-button">Sintesi stampabile ↗</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 / DATA ANALYSIS — fixed labels here; rankings and insight: app.js + analytics.js -->
+      <section id="rankings" class="panel" aria-labelledby="ranking-title" hidden>
+        <div class="section-top">
+          <div>
+            <p class="eyebrow">02 / RUOLI E SKILL</p>
+            <h2 id="ranking-title">Cosa chiedono gli annunci</h2>
+          </div>
+        </div>
+        <div class="filterbar">
+          <label>
+            Settore
+            <select id="rank-sector">
+              <option value="all">Tutti i settori</option>
+              <option value="fusion">Fusione</option>
+              <option value="fission">Fissione</option>
+              <option value="accelerators">Infrastrutture</option>
+              <option value="healthcare">Healthcare</option>
+            </select>
+          </label>
+          <label title="Nel settore selezionato usa l’intensità specifica; con tutti i settori usa quella principale della realtà.">
+            Intensità del coinvolgimento
+            <select id="rank-intensity" aria-describedby="rank-intensity-help">
+              <option value="all">Tutte le intensità</option>
+              <option value="3">3 · Nucleo</option>
+              <option value="2">2 · Specialista</option>
+              <option value="1">1 · Abilitante</option>
+            </select>
+          </label>
+          <label>
+            Livello
+            <select id="rank-level">
+              <option value="all">Tutti i livelli</option>
+            </select>
+          </label>
+          <div class="country-filter">
+            <span id="rank-country-label">Paesi del lavoro</span>
+            <details id="rank-country" class="country-picker">
+              <summary id="rank-country-summary">Tutti i paesi</summary>
+              <div class="country-menu">
+                <div class="country-actions"><button type="button" id="rank-country-all" class="text-button">Tutti</button><button type="button" id="rank-country-none" class="text-button">Nessuno</button></div>
+                <div id="rank-country-options" role="group" aria-labelledby="rank-country-label"></div>
+              </div>
+            </details>
+          </div>
+          <button id="rank-reset" class="text-button">Azzera</button>
+        </div>
+        <div id="rank-tabs" class="sector-tabs" role="group" aria-label="Categoria ranking">
+          <button class="sector active" data-rank="roles">Ruoli</button>
+          <button class="sector" data-rank="skills">Competenze</button>
+          <button class="sector" data-rank="tools">Tool e software</button>
+          <button class="sector" data-rank="standards">Norme e codici</button>
+          <button class="sector" data-rank="levels">Livelli</button>
+          <button class="sector" data-rank="languages">Lingue</button>
+        </div>
+        <div class="ranking-layout">
+          <div id="ranking-list"></div>
+          <aside id="lens" class="insight"></aside>
+        </div>
+        <div class="section-top compact">
+          <h3 id="jobs-heading">Annunci del campione</h3>
+          <button id="clear-term" class="text-button" hidden>Togli filtro voce ×</button>
+        </div>
+        <div id="jobs-list" class="jobs-list"></div>
+        <button id="more-jobs" class="button" hidden>Mostra altri annunci</button>
+      </section>
+
+      <!-- METHODOLOGY — content generated by methodology() in app.js -->
+      <section id="methodology" class="panel" aria-labelledby="method-title" hidden>
+        <div class="section-top">
+          <div>
+            <p class="eyebrow">04 / FONTI E LIMITI</p>
+            <h2 id="method-title">Un atlante che puoi verificare</h2>
+          </div>
+        </div>
+        <div id="method-content" class="method-grid"></div>
+      </section>
+
+      <!-- DATABASE — fixed labels and buttons here; forms and rows: database.js + platform-ui.js -->
+      <section id="database" class="panel" aria-labelledby="db-title" hidden>
+        <div class="section-top">
+          <div>
+            <p class="eyebrow">03 / GESTISCI LE FONTI</p>
+            <h2 id="db-title">Database di realtà e annunci</h2>
+          </div>
+        </div>
+        <div class="db-actions">
+          <button id="db-add" class="button">+ Aggiungi realtà</button>
+          <button id="db-catalog" class="button light">Personalizza settori e cataloghi</button>
+          <button id="db-review" class="button light">Da approfondire</button>
+          <button id="db-export" class="button light">Esporta database JSON</button>
+          <button id="db-previous" class="button light" hidden>Esporta copia precedente</button>
+          <button id="db-undo" class="button light" disabled>Annulla ultima modifica</button>
+          <input id="db-import" type="file" accept=".json,application/json" hidden>
+        </div>
+        
+        <div id="db-status" role="status" class="muted"></div>
+
+        <!-- Catalog editor — sectors and terms generated by catalog.js -->
+        <details id="catalog-panel" class="method-card catalog-panel">
+          <summary>Settori e cataloghi personalizzati</summary>
+          <p class="muted">
+            Modifica le classificazioni usate da mappa, schede e annunci. Le nuove voci si attribuiscono agli
+            annunci solo quando documentate da una fonte. Le modifiche sono incluse nell’export del database.
+          </p>
+          <div id="catalog-tabs" class="sector-tabs" role="group" aria-label="Catalogo da gestire"></div>
+          <div class="catalog-toolbar">
+            <label>Cerca una voce<input id="catalog-search" type="search" placeholder="Nome o descrizione…"></label>
+            <button id="catalog-add" class="button small">+ Nuovo settore</button>
+          </div>
+          <p id="catalog-count" class="muted"></p>
+          <div id="catalog-rows"></div>
+        </details>
+        <div class="filterbar">
+          <label class="search">Cerca nel database<input id="db-search" type="search" placeholder="Nome, città, progetto…"></label>
+          <label>
+            Settore
+            <select id="db-sector">
+              <option value="all">Tutti</option>
+              <option value="fusion">Fusione</option>
+              <option value="fission">Fissione</option>
+              <option value="accelerators">Infrastrutture</option>
+              <option value="healthcare">Healthcare</option>
+            </select>
+          </label>
+          <label>
+            Tipo
+            <select id="db-type">
+              <option value="all">Tutti</option>
+            </select>
+          </label>
+          <label>
+            Applicazione
+            <select id="db-application">
+              <option value="all">Tutte</option>
+            </select>
+          </label>
+          <label>
+            Annunci registrati
+            <select id="db-has-jobs">
+              <option value="all">Tutte le realtà</option>
+              <option value="yes">Con annunci</option>
+              <option value="no">Senza annunci</option>
+            </select>
+          </label>
+        </div>
+        <div id="db-count" class="muted"></div>
+        <div class="db-actions db-pagination">
+          <label>Ordina per
+            <select id="db-sort">
+              <option value="name-asc">Nome · A–Z</option>
+              <option value="name-desc">Nome · Z–A</option>
+              <option value="jobs-desc">Annunci · dal maggiore</option>
+              <option value="jobs-asc">Annunci · dal minore</option>
+              <option value="country">Paese · A–Z</option>
+              <option value="verified-desc">Ultima verifica · più recente</option>
+              <option value="verified-asc">Ultima verifica · meno recente</option>
+            </select>
+          </label>
+          <label>
+            Righe per pagina
+            <select id="db-page-size">
+              <option>50</option>
+              <option selected>100</option>
+              <option>250</option>
+            </select>
+          </label>
+          <button id="db-prev-page" class="button small light">Precedente</button>
+          <span id="db-page-label"></span>
+          <button id="db-next-page" class="button small light">Successiva</button>
+        </div>
+        <div class="table-scroll">
+          <table class="db-table">
+            <thead>
+              <tr>
+                <th>Realtà / sede</th>
+                <th>Settore / applicazione</th>
+                <th>Ambiti ingegneristici suggeriti</th>
+                <th>Verifica</th>
+                <th>Archivio</th>
+                <th>Azioni</th>
+              </tr>
+            </thead>
+
+            <!-- Database rows generated by database.js; do not enter companies in this table. -->
+            <tbody id="db-rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Printable shortlist — populated by app.js -->
+      <section id="print-summary" hidden></section>
+    </main>
+    <footer>
+      <span>EU Nuclear Atlas <b>·</b> Edizione pubblica.</span>
+      <span>Progetto indipendente · <a href="#methodology">Metodo e limiti</a></span>
+    </footer>
+
+    <!-- Shared dialog — company details, job details and editing forms -->
+    <dialog id="detail">
+      <button class="close" aria-label="Chiudi scheda">×</button>
+      <div id="detail-content"></div>
+    </dialog>
+    <div id="toast" role="status" class="toast" hidden></div>
+    <script src="vendor/leaflet.js"></script>
+    <script src="vendor/leaflet.markercluster.js"></script>
+    <script src="data/atlas.js"></script>
+    <script src="data/map.js"></script>
+    <script src="data/schema.js"></script>
+    <script src="platform-model.js"></script>
+    <script src="database-store.js"></script>
+    <script src="vendor/maplibre-gl.js"></script>
+    <script src="vendor/leaflet-maplibre-gl.js"></script>
+    <script src="map-background.js"></script>
+    <script src="app.js"></script>
+    <script src="database.js"></script>
+    <script src="catalog.js"></script>
+    <script src="platform-ui.js"></script>
+    <script src="analytics.js"></script>
+    <script src="geography.js"></script>
+  </body>
+</html>

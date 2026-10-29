@@ -4,6 +4,8 @@ Static atlas and engineering-skills explorer for the European nuclear sector.
 The interface is in Italian. This independent educational project was developed
 with AI assistance and is not affiliated with the organisations listed.
 
+[Open the live atlas](https://m4x000.github.io/eu-nuclear-atlas/)
+
 ## Public edition
 
 **270 organisations (268 EU + Switzerland; 2 optional UK entries) · 20 real historical vacancy records.** The complete editorial employer directory is included. Vacancy records are
